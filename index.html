@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Giulia-Listener 🎤</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    button {
+      padding: 10px 20px;
+      background: #ff4081;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      margin-top: 20px;
+    }
+    button:hover {
+      background: #e91e63;
+    }
+    .status {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: #aaa;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎧 Sag "Giulia" oder "Gulia"</h1>
+  <p class="status">Klicke auf „Start“, um das Mikrofon zu aktivieren.</p>
+  <button id="startBtn">🎙️ Start</button>
+
+  <audio id="sound" src="t.mp3"></audio>
+
+  <script>
+    const startBtn = document.getElementById('startBtn');
+    const status = document.querySelector('.status');
+    const sound = document.getElementById('sound');
+
+    let recognizing = false;
+    let recognition;
+
+    if ('webkitSpeechRecognition' in window) {
+      recognition = new webkitSpeechRecognition();
+      recognition.lang = 'de-DE';
+      recognition.continuous = true;
+      recognition.interimResults = false;
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase().trim();
+        console.log('Erkannt:', transcript);
+        status.textContent = `Erkannt: "${transcript}"`;
+
+        if (transcript.includes("giulia") || transcript.includes("gulia")) {
+          sound.currentTime = 0;
+          sound.play();
+        }
+      };
+
+      recognition.onstart = () => {
+        recognizing = true;
+        status.textContent = "🎤 Zuhören... Sag 'Giulia' oder 'Gulia'.";
+        startBtn.textContent = "🛑 Stop";
+      };
+
+      recognition.onend = () => {
+        recognizing = false;
+        status.textContent = "⏹️ Erkennung gestoppt.";
+        startBtn.textContent = "🎙️ Start";
+      };
+
+      startBtn.addEventListener('click', () => {
+        if (recognizing) {
+          recognition.stop();
+        } else {
+          recognition.start();
+        }
+      });
+    } else {
+      status.textContent = "❌ Dein Browser unterstützt keine Spracherkennung.";
+      startBtn.disabled = true;
+    }
+  </script>
+</body>
+</html>
