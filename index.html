@@ -13,6 +13,7 @@
       align-items: center;
       justify-content: center;
       height: 100vh;
+      text-align: center;
     }
     button {
       padding: 10px 20px;
@@ -23,6 +24,7 @@
       cursor: pointer;
       font-size: 18px;
       margin-top: 20px;
+      transition: background 0.3s ease;
     }
     button:hover {
       background: #e91e63;
@@ -35,7 +37,7 @@
   </style>
 </head>
 <body>
-  <h1>🎧 Sag "Giulia" oder "Gulia"</h1>
+  <h1>🎧 Sag „Giulia“ oder „Gulia“</h1>
   <p class="status">Klicke auf „Start“, um das Mikrofon zu aktivieren.</p>
   <button id="startBtn">🎙️ Start</button>
 
@@ -60,28 +62,39 @@
         console.log('Erkannt:', transcript);
         status.textContent = `Erkannt: "${transcript}"`;
 
-        if (transcript.includes("giulia") || transcript.includes("julia")) {
+        // Varianten von Giulia / Gulia / Julia erkennen
+        if (
+          transcript.includes("giulia") ||
+          transcript.includes("gulia") ||
+          transcript.includes("julia")
+        ) {
           sound.currentTime = 0;
-          sound.play();
+          sound.play().catch(err => console.log(err));
         }
       };
 
       recognition.onstart = () => {
         recognizing = true;
-        status.textContent = "🎤 Zuhören... Sag 'Giulia' oder 'Gulia'.";
+        status.textContent = "🎤 Zuhören... Sag 'Giulia', 'Gulia' oder 'Julia'.";
         startBtn.textContent = "🛑 Stop";
       };
 
       recognition.onend = () => {
-        recognizing = false;
-        status.textContent = "⏹️ Erkennung gestoppt.";
-        startBtn.textContent = "🎙️ Start";
+        if (recognizing) {
+          // automatisch neu starten, falls versehentlich gestoppt
+          recognition.start();
+        } else {
+          status.textContent = "⏹️ Erkennung gestoppt.";
+          startBtn.textContent = "🎙️ Start";
+        }
       };
 
       startBtn.addEventListener('click', () => {
         if (recognizing) {
+          recognizing = false;
           recognition.stop();
         } else {
+          recognizing = true;
           recognition.start();
         }
       });
